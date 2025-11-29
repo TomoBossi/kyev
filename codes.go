@@ -264,7 +264,7 @@ const (
 	KEY_MICMUTE          = 248
 )
 
-var KeycodeLabelMap = map[uint]string{
+var KeycodeLabelMap = map[uint16]string{
 	KEY_0:         "0",
 	KEY_1:         "1",
 	KEY_2:         "2",
@@ -311,8 +311,8 @@ var KeycodeLabelMap = map[uint]string{
 	// ...
 }
 
-var LabelKeycodeMap = func() map[string]uint {
-	m := make(map[string]uint)
+var LabelKeycodeMap = func() map[string]uint16 {
+	m := make(map[string]uint16)
 	for keycode, label := range KeycodeLabelMap {
 		m[label] = keycode
 	}
