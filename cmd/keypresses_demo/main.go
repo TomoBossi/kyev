@@ -19,6 +19,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer keyboard.Close()
 
 	fmt.Println("press ESC to exit")
 	for {

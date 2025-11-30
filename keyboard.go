@@ -14,6 +14,7 @@ import (
 const (
 	bufferSize     = 24 * 128
 	inputEventSize = 24
+	keyboardEV     = 0x120013
 )
 
 type InputEvent struct {
@@ -31,16 +32,16 @@ type Timeval struct {
 type Keyboard struct {
 	Name    string
 	Phys    string
-	DevNode *os.File
-	Buffer  []byte
+	devNode *os.File
+	buffer  []byte
 }
 
 func newKeyboard(name, phys string, devNode *os.File) *Keyboard {
 	return &Keyboard{
 		Name:    name,
 		Phys:    phys,
-		DevNode: devNode,
-		Buffer:  make([]byte, bufferSize),
+		devNode: devNode,
+		buffer:  make([]byte, bufferSize),
 	}
 }
 
@@ -52,7 +53,6 @@ func discoverKeyboards(nameMatch, physMatch string) ([]*Keyboard, error) {
 		return nil, err
 	}
 
-	const keyboardEV = 0x120013
 	re := regexp.MustCompile(`(?s).*N: Name="(.*)".*P: Phys=([^\n]*).*H: Handlers=.*event(\d+).*B: EV=([^\n]*)`)
 	for dev := range strings.SplitSeq(string(devices), "\nI: ") {
 
@@ -111,7 +111,7 @@ func GetKeyboard(nameMatch, physMatch string) (*Keyboard, error) {
 }
 
 func (k *Keyboard) GetEvents() ([]InputEvent, error) {
-	numBytes, err := k.DevNode.Read(k.Buffer)
+	numBytes, err := k.devNode.Read(k.buffer)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (k *Keyboard) GetEvents() ([]InputEvent, error) {
 	}
 
 	events := make([]InputEvent, eventCount)
-	buffer := bytes.NewReader(k.Buffer[:numBytes])
+	buffer := bytes.NewReader(k.buffer[:numBytes])
 	err = binary.Read(buffer, binary.LittleEndian, &events)
 	if err != nil {
 		return nil, err
@@ -145,4 +145,13 @@ func (k *Keyboard) GetKeyPresses() ([]InputEvent, error) {
 	}
 
 	return keyPresses, nil
+}
+
+func (k *Keyboard) Close() error {
+	if k.devNode == nil {
+		return nil
+	}
+	err := k.devNode.Close()
+	k.devNode = nil
+	return err
 }
