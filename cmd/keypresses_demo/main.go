@@ -22,7 +22,7 @@ func main() {
 
 	fmt.Println("press ESC to exit")
 	for {
-		keypresses, err := keyboard.GetKeypresses()
+		keypresses, err := keyboard.GetKeyPresses()
 		if err != nil {
 			panic(err)
 		}

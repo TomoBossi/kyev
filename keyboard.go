@@ -131,7 +131,7 @@ func (k *Keyboard) GetEvents() ([]InputEvent, error) {
 	return events, nil
 }
 
-func (k *Keyboard) GetKeypresses() ([]InputEvent, error) {
+func (k *Keyboard) GetKeyPresses() ([]InputEvent, error) {
 	events, err := k.GetEvents()
 	if err != nil {
 		return nil, err
