@@ -139,7 +139,7 @@ func (k *Keyboard) GetKeypresses() ([]InputEvent, error) {
 
 	var keyPresses []InputEvent
 	for _, event := range events {
-		if event.Type == EV_KEY && event.Value == 1 { // key pressed
+		if event.Type == EV_KEY && event.Value == BTN_PRESSED {
 			keyPresses = append(keyPresses, event)
 		}
 	}

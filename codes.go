@@ -14,6 +14,9 @@ const (
 	EV_PWR               = 0x16
 	EV_FF_STATUS         = 0x17
 	EV_MAX               = 0x1f
+	SYN_REPORT           = 0
+	BTN_PRESSED          = 1
+	BTN_RELEASED         = 0
 	KEY_RESERVED         = 0
 	KEY_ESC              = 1
 	KEY_1                = 2
