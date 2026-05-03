@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	keyboard, err := kyev.GetKeyboard(flags.nameMatch, flags.physMatch)
+	keyboard, err := kyev.Open(flags.nameMatch, flags.physMatch)
 	if err != nil {
 		panic(err)
 	}

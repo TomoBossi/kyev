@@ -29,6 +29,11 @@ type Timeval struct {
 	Usec uint64
 }
 
+type keyboardData struct {
+	name        string
+	phys        string
+	devNodePath string
+}
 type Keyboard struct {
 	Name    string
 	Phys    string
@@ -36,17 +41,22 @@ type Keyboard struct {
 	buffer  []byte
 }
 
-func newKeyboard(name, phys string, devNode *os.File) *Keyboard {
+func newKeyboard(data *keyboardData) (*Keyboard, error) {
+	devNode, err := os.Open(data.devNodePath) // requires sudo
+	if err != nil {
+		return nil, err
+	}
+
 	return &Keyboard{
-		Name:    name,
-		Phys:    phys,
+		Name:    data.name,
+		Phys:    data.phys,
 		devNode: devNode,
 		buffer:  make([]byte, bufferSize),
-	}
+	}, nil
 }
 
-func discoverKeyboards(nameMatch, physMatch string) ([]*Keyboard, error) {
-	var keyboards []*Keyboard
+func discoverKeyboards(nameMatch, physMatch string) ([]*keyboardData, error) {
+	var keyboards []*keyboardData
 
 	devices, err := os.ReadFile("/proc/bus/input/devices")
 	if err != nil {
@@ -75,26 +85,18 @@ func discoverKeyboards(nameMatch, physMatch string) ([]*Keyboard, error) {
 		physMatched := strings.Contains(strings.ToLower(phys), strings.ToLower(physMatch))
 
 		if isKeyboard && nameMatched && physMatched {
-
-			devNode, err := os.Open(devNodePath) // requires sudo
-			if err != nil {
-				return nil, err
-			}
-
-			keyboard := newKeyboard(
-				name,
-				phys,
-				devNode,
-			)
-
-			keyboards = append(keyboards, keyboard)
+			keyboards = append(keyboards, &keyboardData{
+				name:        name,
+				phys:        phys,
+				devNodePath: devNodePath,
+			})
 		}
 	}
 
 	return keyboards, nil
 }
 
-func GetKeyboard(nameMatch, physMatch string) (*Keyboard, error) {
+func Open(nameMatch, physMatch string) (*Keyboard, error) {
 	keyboards, err := discoverKeyboards(nameMatch, physMatch)
 	if err != nil {
 		return nil, err
@@ -102,9 +104,9 @@ func GetKeyboard(nameMatch, physMatch string) (*Keyboard, error) {
 
 	if len(keyboards) > 0 {
 		sort.Slice(keyboards, func(i, j int) bool {
-			return len(keyboards[i].Name) < len(keyboards[j].Name)
+			return len(keyboards[i].name) < len(keyboards[j].name)
 		})
-		return keyboards[0], nil
+		return newKeyboard(keyboards[0])
 	}
 
 	return nil, fmt.Errorf("no keyboards were discovered")
