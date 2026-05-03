@@ -41,7 +41,7 @@ type Keyboard struct {
 	buffer  []byte
 }
 
-func newKeyboard(data *keyboardData) (*Keyboard, error) {
+func newKeyboard(data keyboardData) (*Keyboard, error) {
 	devNode, err := os.Open(data.devNodePath) // requires sudo
 	if err != nil {
 		return nil, err
@@ -55,8 +55,8 @@ func newKeyboard(data *keyboardData) (*Keyboard, error) {
 	}, nil
 }
 
-func discoverKeyboards(nameMatch, physMatch string) ([]*keyboardData, error) {
-	var keyboards []*keyboardData
+func discoverKeyboards(nameMatch, physMatch string) ([]keyboardData, error) {
+	var keyboards []keyboardData
 
 	devices, err := os.ReadFile("/proc/bus/input/devices")
 	if err != nil {
@@ -85,7 +85,7 @@ func discoverKeyboards(nameMatch, physMatch string) ([]*keyboardData, error) {
 		physMatched := strings.Contains(strings.ToLower(phys), strings.ToLower(physMatch))
 
 		if isKeyboard && nameMatched && physMatched {
-			keyboards = append(keyboards, &keyboardData{
+			keyboards = append(keyboards, keyboardData{
 				name:        name,
 				phys:        phys,
 				devNodePath: devNodePath,
