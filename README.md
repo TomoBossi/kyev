@@ -9,10 +9,11 @@ Be on Linux. Install the module, import and use it in your program, then compile
 
 ```go
 func main() {
-	keyboard, err := kyev.GetKeyboard("keyboard", "usb")
+	keyboard, err := kyev.Open("keyboard", "usb")
 	if err != nil {
 		panic(err)
 	}
+	defer keyboard.Close()
 
 	for {
 		events, err := keyboard.GetEvents()
